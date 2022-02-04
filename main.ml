@@ -1,6 +1,6 @@
 let main () =
-  let entries = Storage.run () in
-  Rss.write_rss entries
+  Sql.entries ()
+  |> Rss.write_rss
 
 let _ =
   main ()

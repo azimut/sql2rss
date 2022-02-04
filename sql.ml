@@ -10,21 +10,19 @@ type t =
     message    : string;
   }
 
-let run () =
+let resolve cell =
+  cell
+  |> Pgx.Value.to_string
+  |> Option.value ~default:""
 
-  let resolve cell =
-    cell
-    |> Pgx.Value.to_string
-    |> Option.value ~default:"" in
+let to_record = function
+  | [c;w;m] ->
+     { created_at = resolve c;
+       window     = resolve w;
+       message    = resolve m; }
+  | _ -> assert false
 
-  let to_record = function
-    | [c;w;m] ->
-       { created_at = resolve c;
-         window     = resolve w;
-         message    = resolve m; }
-    | _ -> assert false
-  in
-
+let entries () =
   Pgx_unix.with_conn ~database ~user
     (fun dbh ->
       Pgx_unix.simple_query dbh query
