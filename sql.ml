@@ -1,8 +1,31 @@
 let database = "irclogs"
 let user = "postgres"
-let query =
-  Stdio.In_channel.with_file "query.sql"
-    ~f:Stdio.In_channel.input_all
+let query = {|
+select date_trunc('minute', created_at) as dt,
+       logs.window                      as win,
+       string_agg(
+         regexp_replace(-- delete **SomeText**
+           regexp_replace(-- delete discord emojis
+             substr(message, 1+strpos(message, '>')), --delete nicks
+             ':.+: <https://cdn.discordapp.com/emojis/.+.png>',
+             ''),
+             '\*\*.+\*\*',
+             ''),
+         '<br/>' order by created_at)   as msg
+  from logs
+ where logs.window in ('#avisos-laborales-deployar',
+                       '#bolsa-de-trabajo-infochicas',
+                       '#dev-ofertas',
+                       '#job-search-ekoparty',
+                       '#ofertas-senior-leader',
+                       '#ofertas-semi-senior',
+                       '#ofertas-trainee',
+                       '#ofertas-junior')
+   and created_at > current_date - interval '7 days'
+ group by dt, win
+ order by dt desc
+ limit 20;
+|}
 
 type t =
   { created_at : string;

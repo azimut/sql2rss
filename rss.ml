@@ -14,6 +14,11 @@ let block ?(attr=[]) output name data =
     Xmlm.output output @@ `Data data;
     Xmlm.output output `El_end
 
+let write_author output name =
+  Xmlm.output output @@ `El_start (("","author"),[]);
+  block output "name" name;
+  Xmlm.output output `El_end
+
 let write_header output =
   block output "updated" @@ now_string ();
   block output "id" "sql2rss";
@@ -23,12 +28,12 @@ let write_header output =
 
 let write_entry output ( entry : Sql.t ) =
   Xmlm.output output @@ `El_start (("","entry"),[]);
-  block output "id" entry.created_at;
   block output "link" "https://discord.com/channels/@me"
     ~attr:[("","href"),"https://discord.com/channels/@me"];
-  block output "author" entry.window;
+  block output "id" entry.created_at;
   block output "content" entry.message;
   block output "published" entry.created_at;
+  write_author output entry.window;
   Xmlm.output output `El_end
 
 let write_entries output ( entries : Sql.t list ) =
