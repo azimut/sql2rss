@@ -11,7 +11,7 @@ select date_trunc('minute', created_at) as dt,
              ''),
              '\*\*.+\*\*',
              ''),
-         '<br/>' order by created_at)   as msg
+         chr(10) order by created_at)   as msg
   from logs
  where logs.window in ('#avisos-laborales-deployar',
                        '#bolsa-de-trabajo-infochicas',

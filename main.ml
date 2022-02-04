@@ -1,6 +1,6 @@
 let main () =
   Sql.entries ()
-  |> Rss.write_rss
+  |> Rss.print
 
 let _ =
   main ()

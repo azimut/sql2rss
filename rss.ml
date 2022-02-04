@@ -1,4 +1,3 @@
-
 let now_string () =
   let now = Unix.localtime @@ Unix.time () in
   Printf.sprintf "%d-%02d-%02dT%02d:%02d:%02dZ"
@@ -9,43 +8,42 @@ let now_string () =
     now.tm_min
     now.tm_sec
 
-let block ?(attr=[]) output name data =
-    Xmlm.output output @@ `El_start (("",name) , attr);
-    Xmlm.output output @@ `Data data;
-    Xmlm.output output `El_end
+let assoc_to_string assoc =
+  assoc
+  |> List.map (fun (x,y) -> x ^ "=\"" ^ y ^ "\"")
+  |> String.concat " "
 
-let write_author output name =
-  Xmlm.output output @@ `El_start (("","author"),[]);
-  block output "name" name;
-  Xmlm.output output `El_end
+let block ?(attr=[]) name data =
+  match attr with
+  | [] -> Printf.printf "<%s>%s</%s>\n" name data name
+  | _ -> Printf.printf "<%s %s>%s</%s>\n" name (assoc_to_string attr) data name
 
-let write_header output =
-  block output "updated" @@ now_string ();
-  block output "id" "sql2rss";
-  block output "link" "https://discord.com/channels/@me"
-    ~attr:[("","href"),"https://discord.com/channels/@me"];
-  block output "title" "Discord Jobs"
+let print_author name =
+  Printf.printf "<author><name>%s</name></author>" name
 
-let write_entry output ( entry : Sql.t ) =
-  Xmlm.output output @@ `El_start (("","entry"),[]);
-  block output "link" "https://discord.com/channels/@me"
-    ~attr:[("","href"),"https://discord.com/channels/@me"];
-  block output "id" entry.created_at;
-  block output "content" entry.message;
-  block output "published" entry.created_at;
-  write_author output entry.window;
-  Xmlm.output output `El_end
+let print_header () =
+  block "title" "Discord Jobs";
+  block "id" "sql2rss:discord";
+  block "link" "https://discord.com/channels/@me"
+    ~attr:["href","https://discord.com/channels/@me"];
+  block "updated" @@ now_string ()
 
-let write_entries output ( entries : Sql.t list ) =
-  List.iter (fun e -> write_entry output e)
-    entries
+let print_entry ( entry : Sql.t ) =
+  let length = min 80 (String.length entry.message) in
+  let title = String.sub entry.message 0 length in
+  print_endline "<entry>";
+  block "link" "https://discord.com/channels/@me"
+    ~attr:["href","https://discord.com/channels/@me"];
+  block "id" entry.created_at;
+  block "content" entry.message;
+  block "published" entry.created_at;
+  block "title" title;
+  print_author entry.window;
+  print_endline "</entry>"
 
-let write_rss ( entries : Sql.t list ) =
-  let feed = ("","feed"),[("","xlmns"),"http://www.w3.org/2005/Atom"] in
-  let output = Xmlm.make_output ~indent:(Some 2)
-                 (`Channel stdout) in
-  Xmlm.output output @@ `Dtd None;
-  Xmlm.output output @@ `El_start feed;
-  write_header output;
-  write_entries output entries;
-  Xmlm.output output `El_end
+let print ( entries : Sql.t list ) =
+  print_endline "<?xml version='1.0' encoding='utf-8'?>";
+  print_endline "<feed xmlns='http://www.w3.org/2005/Atom'>";
+  print_header ();
+  List.iter print_entry entries;
+  print_endline "</feed>"
