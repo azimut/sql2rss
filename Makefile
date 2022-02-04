@@ -9,3 +9,7 @@ sql2rss: $(SRCS)
 .PHONY: clean
 clean:
 	rm -f sql2rss *.cmi *.cmo *.cmx *.o
+
+.PHONY: install
+install:
+	cp -f sql2rss $(HOME)/.newsboat/feeds/
