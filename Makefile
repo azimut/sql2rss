@@ -11,5 +11,5 @@ clean:
 	rm -f sql2rss *.cmi *.cmo *.cmx *.o
 
 .PHONY: install
-install:
+install: sql2rss
 	cp -f sql2rss $(HOME)/.newsboat/feeds/
