@@ -1,0 +1,10 @@
+(executable
+ (name sql2rss)
+ (libraries unix pgx_unix))
+
+(env
+ (dev
+  (flags (:standard -w @A-4-33-40-41-42-43-34-44-70)))
+ (release
+  (ocamlopt_flags (:standard -O3))))
+
