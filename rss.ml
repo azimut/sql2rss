@@ -1,12 +1,16 @@
-let now_string () =
-  let now = Unix.localtime @@ Unix.time () in
-  Printf.sprintf "%d-%02d-%02dT%02d:%02d:%02dZ"
-    (now.tm_year + 1900)
-    now.tm_mon
-    now.tm_mday
-    now.tm_hour
-    now.tm_min
-    now.tm_sec
+let title = "Discord Jobs v1.4"
+let id = "sql2rss:discord:1.4"
+let link = "https://discord.com/channels/@me"
+
+(* block "LatBuildDate" "Fri, 18 Mar 2022 18:49:10 +0000" *)
+let now () =
+  let t = Unix.(localtime @@ time ()) in
+  Printf.sprintf "Fri, %d Mar %d %02d:%02d:%02d +0000"
+    t.tm_mday
+    (t.tm_year + 1900)
+    t.tm_hour
+    t.tm_min
+    t.tm_sec
 
 let assoc_to_string assoc =
   assoc
@@ -18,32 +22,30 @@ let block ?(attr=[]) name data =
   | [] -> Printf.printf "<%s>%s</%s>\n" name data name
   | _ -> Printf.printf "<%s %s>%s</%s>\n" name (assoc_to_string attr) data name
 
-let print_author name =
-  Printf.printf "<author><name>%s</name></author>" name
-
 let print_header () =
-  block "title" "Discord Jobs";
-  block "id" "sql2rss:discord";
-  block "link" "https://discord.com/channels/@me"
-    ~attr:["href","https://discord.com/channels/@me"];
-  block "updated" @@ now_string ()
+  block "title" title;
+  block "link" link;
+  print_endline @@ "<atom:link href=\"" ^ link ^ "\" rel=\"self\" type=\"application/rss+xml\" />";
+  block "lastBuildDate" @@ now ()
 
 let print_entry ( entry : Sql.t ) =
-  let length = min 80 (String.length entry.message) in
-  let title = String.sub entry.message 0 length in
-  print_endline "<entry>";
-  block "link" "https://discord.com/channels/@me"
-    ~attr:["href","https://discord.com/channels/@me"];
-  block "id" entry.created_at;
-  block "content" entry.message;
-  block "published" entry.created_at;
-  block "title" title;
-  print_author entry.window;
-  print_endline "</entry>"
+  let sub s n = String.sub s 0 @@ min n @@ String.length s in
+  let print_author () = Printf.printf "<author><name>%s</name></author>\n" entry.window in
+  let ntobr s = s |> String.split_on_char '\n' |> String.concat "<br>" in
+  print_endline "<item>";
+  print_author ();
+  block "title" @@ sub entry.message 80;
+  block "pubDate" entry.created_at;
+  block "guid" entry.created_at ~attr:["isPermaLink","false"];
+  block "link" link ~attr:["href",link];
+  Printf.printf "<description><![CDATA[\n DOWN %s\n]]></description>\n" @@ ntobr entry.message;
+  print_endline "</item>"
 
 let print ( entries : Sql.t list ) =
-  print_endline "<?xml version='1.0' encoding='utf-8'?>";
-  print_endline "<feed xmlns='http://www.w3.org/2005/Atom'>";
+  print_endline "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+  print_endline "<rss version=\"2.0\" xmlns:discourse=\"http://www.discourse.org/\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">";
+  print_endline "<channel>";
   print_header ();
   List.iter print_entry entries;
-  print_endline "</feed>"
+  print_endline "</channel>";
+  print_endline "</rss>"
