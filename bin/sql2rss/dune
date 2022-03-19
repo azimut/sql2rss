@@ -1,5 +1,5 @@
 (executable
- (name sql2rss)
+ (name main)
  (libraries unix pgx_unix))
 
 (env
