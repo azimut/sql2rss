@@ -1,5 +1,6 @@
+SRC := $(wildcard *.ml)
 
-_build/default/sql2rss.exe:
+_build/default/sql2rss.exe: $(SRC)
 	dune build
 
 .PHONY: clean
