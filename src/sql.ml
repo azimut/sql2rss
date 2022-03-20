@@ -7,7 +7,7 @@ select extract(epoch from
        string_agg(
          regexp_replace(-- delete **SomeText**
            regexp_replace(-- delete discord emojis
-             substr(message, 1+strpos(message, '>')), --delete nicks
+             substr(message, 2+strpos(message, '>')), --delete nicks
              ':.+: <https://cdn.discordapp.com/emojis/.+.png>',
              ''),
              '\*\*.+\*\*',

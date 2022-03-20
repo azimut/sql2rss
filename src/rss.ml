@@ -1,39 +1,15 @@
+open Dateutil
+
 let title = "Discord Jobs v1.4"
 let id = "sql2rss:discord:1.4"
 let link = "https://discord.com/channels/@me"
 
-(* "Fri, 18 Mar 2022 18:49:10 +0000" *)
-let date tm =
-  let day =
-    CalendarLib.(
-      tm
-      |> Date.from_unixtm
-      |> Date.day_of_week
-      |> Printer.short_name_of_day)
-  in
-  let month =
-    CalendarLib.(
-      tm.tm_mon
-      |> Date.month_of_int
-      |> Printer.short_name_of_month)
-  in
-  Printf.sprintf "%s, %d %s %d %02d:%02d:%02d +0000"
-    day
-    tm.tm_mday
-    month
-    (tm.tm_year + 1900)
-    tm.tm_hour
-    tm.tm_min
-    tm.tm_sec
-
-let now () = date @@ Unix.(localtime @@ time ())
-
-let plist_to_string plist =
-  plist
-  |> List.map (fun (x,y) -> Printf.sprintf "%s=\"%s\"" x y)
-  |> String.concat " "
-
 let block ?(attr=[]) name data =
+  let plist_to_string plist =
+    plist
+    |> List.map (fun (x,y) -> Printf.sprintf "%s=\"%s\"" x y)
+    |> String.concat " "
+  in
   match attr with
   | [] -> Printf.printf "<%s>%s</%s>\n" name data name
   | _ -> Printf.printf "<%s %s>%s</%s>\n" name (plist_to_string attr) data name
@@ -47,14 +23,25 @@ let print_header () =
 let print_entry ( entry : Sql.t ) =
   let sub s n = String.sub s 0 @@ min n @@ String.length s in
   let print_author () = Printf.printf "<author><name>%s</name></author>\n" entry.window in
-  let ntobr s = s |> String.split_on_char '\n' |> String.concat "<br>" in
+  let anchorify (s : string) =
+    let map w =
+      if String.starts_with ~prefix:"http" w
+      then Printf.sprintf "<a href='%s'>%s</a>" w w
+      else w
+    in
+    s
+    |> String.split_on_char ' '
+    |> List.map map
+    |> String.concat " "
+  in
+  let ntobr s = s |> String.split_on_char '\n' |> String.concat " <br> " in
   print_endline "<item>";
   print_author ();
   block "title" @@ sub entry.message 80;
   block "pubDate" @@ date entry.created_at;
   block "guid" ~attr:["isPermaLink","false"] @@ date entry.created_at;
   block "link" link ~attr:["href",link];
-  Printf.printf "<description><![CDATA[\n%s\n]]></description>\n" @@ ntobr entry.message;
+  Printf.printf "<description><![CDATA[\nLISP%s\n]]></description>\n" (entry.message |> ntobr |> anchorify) ;
   print_endline "</item>"
 
 let print ( entries : Sql.t list ) =
