@@ -9,7 +9,7 @@ let date tm =
   in
   let month =
     CalendarLib.(
-      tm.tm_mon
+      tm.tm_mon + 1
       |> Date.month_of_int
       |> Printer.short_name_of_month)
   in

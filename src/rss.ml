@@ -24,14 +24,14 @@ let print_entry ( entry : Sql.t ) =
   let sub s n = String.sub s 0 @@ min n @@ String.length s in
   let print_author () = Printf.printf "<author><name>%s</name></author>\n" entry.window in
   let anchorify (s : string) =
-    let map w =
+    let mapanchor w =
       if String.starts_with ~prefix:"http" w
       then Printf.sprintf "<a href='%s'>%s</a>" w w
       else w
     in
     s
     |> String.split_on_char ' '
-    |> List.map map
+    |> List.map mapanchor
     |> String.concat " "
   in
   let ntobr s = s |> String.split_on_char '\n' |> String.concat " <br> " in
