@@ -1,6 +1,6 @@
 (executable
  (name main)
- (libraries calendar unix pgx_unix stdio))
+ (libraries calendar unix pgx_unix))
 
 (env
  (dev

@@ -16,6 +16,5 @@
  (synopsis "Converts a psql query into rss feed")
  (depends
   pgx_unix
-  stdio
   calendar))
 

@@ -10,7 +10,6 @@ bug-reports: "https://github.com/azimut/sql2rss/issues"
 depends: [
   "dune" {>= "2.9"}
   "pgx_unix"
-  "stdio"
   "calendar"
   "odoc" {with-doc}
 ]

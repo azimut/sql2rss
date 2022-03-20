@@ -41,7 +41,7 @@ let print_entry ( entry : Sql.t ) =
   block "pubDate" @@ date entry.created_at;
   block "guid" ~attr:["isPermaLink","false"] @@ date entry.created_at;
   block "link" link ~attr:["href",link];
-  Printf.printf "<description><![CDATA[\n%s\n]]></description>\n" (entry.message |> ntobr |> anchorify) ;
+  Printf.printf "<description><![CDATA[\n%s\n]]></description>\n" (entry.message |> ntobr |> String.trim |> anchorify) ;
   print_endline "</item>"
 
 let print ( entries : Sql.t list ) =
