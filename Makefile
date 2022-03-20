@@ -1,6 +1,6 @@
 SRC := $(wildcard src/*.ml)
 
-_build/default/src/main.exe: $(SRC) src/dune
+_build/default/src/main.exe: $(SRC) src/dune dune-project
 	opam exec -- dune build
 
 .PHONY: clean
