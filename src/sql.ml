@@ -4,15 +4,16 @@ let query = {|
 select extract(epoch from
          date_trunc('minute', created_at)) as dt,
        logs.window                         as win,
-       string_agg(
-         regexp_replace(-- delete **SomeText**
-           regexp_replace(-- delete discord emojis
-             substr(message, 2+strpos(message, '>')), --delete nicks
-             ':.+: <https://cdn.discordapp.com/emojis/.+.png>',
-             ''),
-             '\*\*.+\*\*',
-             ''),
-         chr(10) order by created_at)   as msg
+       regexp_replace(
+         string_agg(
+           regexp_replace(-- delete **SomeText**
+             regexp_replace(-- delete discord emojis
+               substr(message, 2+strpos(message, '>')), --delete nicks
+               ':.+: <https://cdn.discordapp.com/emojis/.+.png>',
+               ''),
+               '\*\*.+\*\*',
+               ''),
+           chr(10) order by created_at), '^\s+', '')   as msg
   from logs
  where logs.window in ('#avisos-laborales-deployar',
                        '#bolsa-de-trabajo-infochicas',
@@ -35,16 +36,12 @@ type t =
     message    : string;
   }
 
-let resolve cell =
-  cell
-  |> Pgx.Value.to_string
-  |> Option.value ~default:""
-
 let to_record = function
   | [c;w;m] ->
-     { created_at = Unix.localtime @@ float_of_string @@ resolve c;
-       window     = resolve w;
-       message    = resolve m; }
+     let module P = Pgx.Value in
+     { created_at = c |> P.to_float_exn |> Unix.localtime;
+       window     = w |> P.to_string_exn;
+       message    = m |> P.to_string_exn; }
   | _ -> assert false
 
 let entries () =
