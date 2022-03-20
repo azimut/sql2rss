@@ -15,6 +15,7 @@ jobs:
           dune-cache: true
       - run: make deps
       - run: make
+      - run: make test
       - uses: actions/upload-artifact@v2
         with:
           name: sql2rss-linux-x86_64
