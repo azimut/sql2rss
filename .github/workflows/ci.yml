@@ -1,0 +1,20 @@
+name: CI build
+on:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.org'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 4.13.x
+      - run: make
+      - uses: actions/upload-artifact@v2
+        with:
+          name: sql2rss-linux-x86_64
+          path: _build/default/src/main.exe
+          if-no-files-found: error
