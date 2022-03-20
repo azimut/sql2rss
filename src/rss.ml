@@ -2,25 +2,41 @@ let title = "Discord Jobs v1.4"
 let id = "sql2rss:discord:1.4"
 let link = "https://discord.com/channels/@me"
 
-(* block "LatBuildDate" "Fri, 18 Mar 2022 18:49:10 +0000" *)
-let now () =
-  let t = Unix.(localtime @@ time ()) in
-  Printf.sprintf "Fri, %d Mar %d %02d:%02d:%02d +0000"
-    t.tm_mday
-    (t.tm_year + 1900)
-    t.tm_hour
-    t.tm_min
-    t.tm_sec
+(* "Fri, 18 Mar 2022 18:49:10 +0000" *)
+let date tm =
+  let day =
+    CalendarLib.(
+      tm
+      |> Date.from_unixtm
+      |> Date.day_of_week
+      |> Printer.short_name_of_day)
+  in
+  let month =
+    CalendarLib.(
+      tm.tm_mon
+      |> Date.month_of_int
+      |> Printer.short_name_of_month)
+  in
+  Printf.sprintf "%s, %d %s %d %02d:%02d:%02d +0000"
+    day
+    tm.tm_mday
+    month
+    (tm.tm_year + 1900)
+    tm.tm_hour
+    tm.tm_min
+    tm.tm_sec
 
-let assoc_to_string assoc =
-  assoc
-  |> List.map (fun (x,y) -> x ^ "=\"" ^ y ^ "\"")
+let now () = date @@ Unix.(localtime @@ time ())
+
+let plist_to_string plist =
+  plist
+  |> List.map (fun (x,y) -> Printf.sprintf "%s=\"%s\"" x y)
   |> String.concat " "
 
 let block ?(attr=[]) name data =
   match attr with
   | [] -> Printf.printf "<%s>%s</%s>\n" name data name
-  | _ -> Printf.printf "<%s %s>%s</%s>\n" name (assoc_to_string attr) data name
+  | _ -> Printf.printf "<%s %s>%s</%s>\n" name (plist_to_string attr) data name
 
 let print_header () =
   block "title" title;
@@ -35,10 +51,10 @@ let print_entry ( entry : Sql.t ) =
   print_endline "<item>";
   print_author ();
   block "title" @@ sub entry.message 80;
-  block "pubDate" entry.created_at;
-  block "guid" entry.created_at ~attr:["isPermaLink","false"];
+  block "pubDate" @@ date entry.created_at;
+  block "guid" ~attr:["isPermaLink","false"] @@ date entry.created_at;
   block "link" link ~attr:["href",link];
-  Printf.printf "<description><![CDATA[\n DOWN %s\n]]></description>\n" @@ ntobr entry.message;
+  Printf.printf "<description><![CDATA[\n%s\n]]></description>\n" @@ ntobr entry.message;
   print_endline "</item>"
 
 let print ( entries : Sql.t list ) =

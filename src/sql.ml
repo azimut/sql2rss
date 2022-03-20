@@ -1,8 +1,9 @@
 let database = "irclogs"
 let user = "postgres"
 let query = {|
-select date_trunc('minute', created_at) as dt,
-       logs.window                      as win,
+select extract(epoch from
+         date_trunc('minute', created_at)) as dt,
+       logs.window                         as win,
        string_agg(
          regexp_replace(-- delete **SomeText**
            regexp_replace(-- delete discord emojis
@@ -29,7 +30,7 @@ select date_trunc('minute', created_at) as dt,
 |}
 
 type t =
-  { created_at : string;
+  { created_at : Unix.tm;
     window     : string;
     message    : string;
   }
@@ -41,7 +42,7 @@ let resolve cell =
 
 let to_record = function
   | [c;w;m] ->
-     { created_at = resolve c;
+     { created_at = Unix.localtime @@ float_of_string @@ resolve c;
        window     = resolve w;
        message    = resolve m; }
   | _ -> assert false
