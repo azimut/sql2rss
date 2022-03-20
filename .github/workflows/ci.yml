@@ -13,7 +13,8 @@ jobs:
         with:
           ocaml-compiler: 4.13.x
           dune-cache: true
-      - run: opam exec -- dune build
+      - run: make deps
+      - run: make
       - uses: actions/upload-artifact@v2
         with:
           name: sql2rss-linux-x86_64
