@@ -3,7 +3,7 @@ on:
   push:
     paths-ignore:
       - 'LICENSE'
-      - 'README.org'
+      - 'README.md'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,7 +12,8 @@ jobs:
       - uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: 4.13.x
-      - run: make
+          dune-cache: true
+      - run: opam exec -- dune build
       - uses: actions/upload-artifact@v2
         with:
           name: sql2rss-linux-x86_64
