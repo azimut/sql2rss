@@ -1,17 +1,14 @@
-SRC := $(wildcard src/*.ml)
+.PHONY: dev release deps test install clean
 
-_build/default/src/main.exe: $(SRC) src/dune dune-project
-	opam exec -- dune build
+dev:     ; opam exec -- dune build --profile dev --build-dir _build_dev
+release: ; opam exec -- dune build --profile release --build-dir _build_release
 
-.PHONY: clean
-clean: ; opam exec -- dune clean
-
-.PHONY: deps
 deps: ; opam install . --deps-only --with-test
-
-.PHONY: test
 test: ; opam exec -- dune runtest
 
-.PHONY: install
-install: _build/default/src/main.exe
-	install $< $(HOME)/.newsboat/feeds/sql2rss
+install: release
+	install _build_release/default/src/main.exe $(HOME)/.newsboat/feeds/sql2rss
+
+clean:
+	opam exec -- dune clean
+	rm -rf _build_release _build_dev
