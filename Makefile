@@ -9,5 +9,3 @@ clean: ; opam exec -- dune clean ; rm -rf _build_release _build_dev
 
 install: release
 	install _build_release/default/src/main.exe $(HOME)/.newsboat/feeds/sql2rss
-
-

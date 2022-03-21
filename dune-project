@@ -17,4 +17,3 @@
  (depends
   pgx_unix
   calendar))
-
