@@ -21,8 +21,6 @@ let print_header () =
   block "lastBuildDate" @@ now ()
 
 let print_entry ( entry : Sql.t ) =
-  let sub s n = String.sub s 0 @@ min n @@ String.length s in
-  let print_author () = Printf.printf "<author><name>%s</name></author>\n" entry.window in
   let anchorify (s : string) =
     let mapanchor w =
       if String.starts_with ~prefix:"http" w
@@ -34,7 +32,9 @@ let print_entry ( entry : Sql.t ) =
     |> List.map mapanchor
     |> String.concat " "
   in
+  let print_author () = Printf.printf "<author><name>%s</name></author>\n" entry.window in
   let ntobr s = s |> String.split_on_char '\n' |> String.concat " <br> " in
+  let sub s n = String.sub s 0 @@ min n @@ String.length s in
   print_endline "<item>";
   print_author ();
   block "title" @@ sub entry.message 80;

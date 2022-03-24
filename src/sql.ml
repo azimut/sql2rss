@@ -4,15 +4,13 @@ let query = {|
 select extract(epoch from
          date_trunc('minute', created_at)) as dt,
        logs.window                         as win,
-       regexp_replace(
+       regexp_replace(-- trim at the beggining
          string_agg(
            regexp_replace(-- delete **SomeText**
              regexp_replace(-- delete discord emojis
                substr(message, 2+strpos(message, '>')), --delete nicks
-               ':.+: <https://cdn.discordapp.com/emojis/.+.png>',
-               ''),
-               '\*\*.+\*\*',
-               ''),
+               ':.+: <https://cdn.discordapp.com/emojis/.+>', ''),
+               '\*\*.+\*\*', ''),
            chr(10) order by created_at), '^\s+', '')   as msg
   from logs
  where logs.window in ('#avisos-laborales-deployar',
@@ -49,4 +47,5 @@ let entries () =
     (fun dbh ->
       Pgx_unix.simple_query dbh query
       |> List.hd
-      |> List.map to_record)
+      |> List.map to_record
+      |> List.filter (fun r -> not (r.message = "")))
