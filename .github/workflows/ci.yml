@@ -16,7 +16,7 @@ jobs:
           ocaml-compiler: 4.13.x
           dune-cache: true
       - run: make deps
-      - run: make release
+      - run: make dev release
       - run: make test
       - uses: actions/upload-artifact@v2
         if: "!startsWith(github.ref, 'refs/tags/')"
