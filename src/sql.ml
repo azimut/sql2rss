@@ -48,4 +48,4 @@ let entries () =
       Pgx_unix.simple_query dbh query
       |> List.hd
       |> List.map to_record
-      |> List.filter (fun r -> not (r.message = "")))
+      |> List.filter (fun r -> r.message <> ""))

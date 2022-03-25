@@ -4,7 +4,7 @@ let title = "Discord Jobs v1.4"
 let id = "sql2rss:discord:1.4"
 let link = "https://discord.com/channels/@me"
 
-let block ?(attr=[]) name data =
+let tag ?(attr=[]) name data =
   let plist_to_string plist =
     plist
     |> List.map (fun (x,y) -> Printf.sprintf "%s=\"%s\"" x y)
@@ -15,10 +15,10 @@ let block ?(attr=[]) name data =
   | _ -> Printf.printf "<%s %s>%s</%s>\n" name (plist_to_string attr) data name
 
 let print_header () =
-  block "title" title;
-  block "link" link;
+  tag "title" title;
+  tag "link" link;
   print_endline @@ "<atom:link href=\"" ^ link ^ "\" rel=\"self\" type=\"application/rss+xml\" />";
-  block "lastBuildDate" @@ now ()
+  tag "lastBuildDate" @@ now ()
 
 let print_entry ( entry : Sql.t ) =
   let anchorify (s : string) =
@@ -37,11 +37,11 @@ let print_entry ( entry : Sql.t ) =
   let sub s n = String.sub s 0 @@ min n @@ String.length s in
   print_endline "<item>";
   print_author ();
-  block "title" @@ sub entry.message 80;
-  block "pubDate" @@ date entry.created_at;
-  block "guid" ~attr:["isPermaLink","false"] @@ date entry.created_at;
-  block "link" link ~attr:["href",link];
-  Printf.printf "<description><![CDATA[\n%s\n]]></description>\n" (entry.message |> ntobr |> anchorify) ;
+  tag "title" @@ sub entry.message 80;
+  tag "pubDate" @@ date entry.created_at;
+  tag "guid" ~attr:["isPermaLink","false"] @@ date entry.created_at;
+  tag "link" link ~attr:["href",link];
+  tag "description" ( Printf.sprintf "<![CDATA[\n%s\n]]>\n" (entry.message |> ntobr |> anchorify) );
   print_endline "</item>"
 
 let print ( entries : Sql.t list ) =
