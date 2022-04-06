@@ -43,7 +43,7 @@ let to_record = function
   | _ -> assert false
 
 let entries () =
-  Pgx_unix.with_conn ~database ~user
+  Pgx_unix.with_conn ~ssl:`No ~database ~user
     (fun dbh ->
       Pgx_unix.simple_query dbh query
       |> List.hd
