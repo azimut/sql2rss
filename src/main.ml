@@ -1,6 +1,3 @@
-let main () =
-  Sql.entries ()
-  |> Rss.print
+let main () = Sql.entries () |> Rss.print
 
-let _ =
-  main ()
+let _ = main ()

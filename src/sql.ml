@@ -1,6 +1,9 @@
 let database = "irclogs"
+
 let user = "postgres"
-let query = {|
+
+let query =
+  {|
 select extract(epoch from
          date_trunc('minute', created_at)) as dt,
        logs.window                         as win,
@@ -28,24 +31,18 @@ select extract(epoch from
  limit 20;
 |}
 
-type t =
-  { created_at : Unix.tm;
-    window     : string;
-    message    : string;
-  }
+type t = {created_at: Unix.tm; window: string; message: string}
 
 let to_record = function
-  | [c;w;m] ->
-     let module P = Pgx.Value in
-     { created_at = c |> P.to_float_exn |> Unix.localtime;
-       window     = w |> P.to_string_exn;
-       message    = m |> P.to_string_exn; }
+  | [c; w; m] ->
+      let module P = Pgx.Value in
+      { created_at= c |> P.to_float_exn |> Unix.localtime
+      ; window= w |> P.to_string_exn
+      ; message= m |> P.to_string_exn }
   | _ -> assert false
 
 let entries () =
-  Pgx_unix.with_conn ~ssl:`No ~database ~user
-    (fun dbh ->
+  Pgx_unix.with_conn ~ssl:`No ~database ~user (fun dbh ->
       Pgx_unix.simple_query dbh query
-      |> List.hd
-      |> List.map to_record
-      |> List.filter (fun r -> r.message <> ""))
+      |> List.hd |> List.map to_record
+      |> List.filter (fun r -> r.message <> "") )
