@@ -30,12 +30,13 @@ let print_entry (entry : Sql.t) =
   let print_author () = Printf.printf "<author><name>%s</name></author>\n" entry.window in
   let ntobr s = s |> String.split_on_char '\n' |> String.concat " <br> " in
   let sub s n = String.sub s 0 @@ min n @@ String.length s in
+  let channel_link = Sql.find_channel entry.window in
   print_endline "<item>" ;
   print_author () ;
   tag "title" @@ sub entry.message 80 ;
   tag "pubDate" @@ date entry.created_at ;
   tag "guid" ~attr:[("isPermaLink", "false")] @@ date entry.created_at ;
-  tag "link" entry.window ~attr:[("href", Sql.find_channel entry.window)] ;
+  tag "link" channel_link ~attr:[("href", channel_link)] ;
   tag "description" (Printf.sprintf "<![CDATA[\n%s\n]]>\n" (entry.message |> ntobr |> anchorify)) ;
   print_endline "</item>"
 
