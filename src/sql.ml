@@ -14,7 +14,8 @@ let channels_alist =
   ; ("#ofertas-senior-leader", "https://discord.com/channels/594363964499165194/759056592648798229")
   ; ("#ofertas-semi-senior", "https://discord.com/channels/594363964499165194/757967606815916174")
   ; ("#ofertas-trainee", "https://discord.com/channels/594363964499165194/757967541170733257")
-  ; ("#ofertas-junior", "https://discord.com/channels/594363964499165194/757967571302482050") ]
+  ; ("#ofertas-junior", "https://discord.com/channels/594363964499165194/757967571302482050")
+  ; ("#vacantes-laborales", "https://discord.com/channels/920046149300265000/920098509196230676") ]
 
 let channels_map = channels_alist |> List.to_seq |> Chans.of_seq
 
